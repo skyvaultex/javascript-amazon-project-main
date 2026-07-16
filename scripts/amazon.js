@@ -27,12 +27,19 @@ products.forEach((product) => {
       <div class="product-price">
         $${(product.priceCents / 100).toFixed(2)}
       </div>
-
+      
       <div class="product-quantity-container">
-        <select>
-          <option selected value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
+          <select class="js-product-quantity-selector-${product.id}" name="quantity">
+          <option value="1"> 1 </option>
+          <option value="2"> 2 </option>
+          <option value="3"> 3 </option>
+          <option value="4"> 4 </option>
+          <option value="5"> 5 </option>
+          <option value="6"> 6 </option>
+          <option value="7"> 7 </option>
+          <option value="8"> 8 </option>
+          <option value="9"> 9 </option>
+          <option value="10"> 10 </option>
         </select>
       </div>
 
@@ -59,6 +66,11 @@ document.querySelectorAll('.js-add-to-cart').
   forEach((button) => {
     button.addEventListener('click', () => {
       const productId = button.dataset.productId;
+      const selectorEl = document.querySelector(`.js-product-quantity-selector-${productId}`);
+      const selectorQuantity = selectorEl instanceof HTMLSelectElement
+        ? Number(selectorEl.value)
+        : 1;
+
       let matchingItem;
 
       cart.forEach((item) => {
@@ -66,12 +78,12 @@ document.querySelectorAll('.js-add-to-cart').
         });
 
         if(matchingItem) { 
-          ++matchingItem.quantity;
+          matchingItem.quantity += selectorQuantity;
         } else {
           cart.push(
           {
-            productId: productId,
-            quantity: 1
+            productId,
+            quantity: selectorQuantity
           })
         }
 
