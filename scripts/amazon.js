@@ -65,7 +65,7 @@ document.querySelector('.js-products-grid')
 document.querySelectorAll('.js-add-to-cart').
   forEach((button) => {
     button.addEventListener('click', () => {
-      const productId = button.dataset.productId;
+      const { productId }= button.dataset;
       const selectorEl = document.querySelector(`.js-product-quantity-selector-${productId}`);
       const selectorQuantity = selectorEl instanceof HTMLSelectElement
         ? Number(selectorEl.value)
