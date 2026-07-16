@@ -4,7 +4,7 @@ let productsHTML = '';
 
 products.forEach((product) => {
   productsHTML += `
- <div class="product-container js-products-grid">
+ <div class="product-container">
 
       <div class="product-image-container">
         <img class="product-image" src="${product.image}">
@@ -75,6 +75,22 @@ document.querySelectorAll('.js-add-to-cart').
           })
         }
 
+      updateCart();
       console.log(cart);
     });
   });
+
+
+function updateCart() {
+  const cartQuantityEl = document.querySelector('.cart-quantity');
+  let cartQuantity = 0;
+
+  cart.forEach((item) => {
+    cartQuantity += item.quantity;
+  });
+
+
+  cartQuantityEl.textContent = cartQuantity;
+}
+
+updateCart();
