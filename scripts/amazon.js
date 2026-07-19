@@ -3,33 +3,34 @@ console.log('loaded');
 let productsHTML = '';
 
 products.forEach((product) => {
+  const {image, name, rating, priceCents, id} = product;
   productsHTML += `
  <div class="product-container">
 
       <div class="product-image-container">
-        <img class="product-image" src="${product.image}">
+        <img class="product-image" src="${image}">
       </div>
 
       <div class="product-name limit-text-to-2-lines">
-        ${product.name}
+        ${name}
       </div>
 
       <div class="product-rating-container">
         <img
           class="product-rating-stars"
-          src="images/ratings/rating-${product.rating.stars * 10}.png"
+          src="images/ratings/rating-${rating.stars * 10}.png"
         >
         <div class="product-rating-count link-primary">
-          ${product.rating.count}
+          ${rating.count}
         </div>
       </div>
 
       <div class="product-price">
-        $${(product.priceCents / 100).toFixed(2)}
+        $${(priceCents / 100).toFixed(2)}
       </div>
       
       <div class="product-quantity-container">
-          <select class="js-product-quantity-selector-${product.id}" name="quantity">
+          <select class="js-product-quantity-selector-${id}" name="quantity">
           <option value="1"> 1 </option>
           <option value="2"> 2 </option>
           <option value="3"> 3 </option>
@@ -45,13 +46,13 @@ products.forEach((product) => {
 
       <div class="product-spacer"></div>
 
-      <div class="added-to-cart">
+      <div class="added-to-cart js-added-to-cart-${id}">
         <img src="images/icons/checkmark.png">
         Added
       </div>
 
       <button class="add-to-cart-button button-primary js-add-to-cart"
-      data-product-id="${product.id}">
+      data-product-id="${id}">
         Add to Cart
       </button>
 
@@ -64,8 +65,9 @@ document.querySelector('.js-products-grid')
 
 document.querySelectorAll('.js-add-to-cart').
   forEach((button) => {
+    let timeoutID;
     button.addEventListener('click', () => {
-      const { productId }= button.dataset;
+      const { productId } = button.dataset;
       const selectorEl = document.querySelector(`.js-product-quantity-selector-${productId}`);
       const selectorQuantity = selectorEl instanceof HTMLSelectElement
         ? Number(selectorEl.value)
@@ -87,6 +89,8 @@ document.querySelectorAll('.js-add-to-cart').
           })
         }
 
+
+      timeoutID = addedToCart(productId, timeoutID);
       updateCart();
       console.log(cart);
     });
@@ -103,6 +107,15 @@ function updateCart() {
 
 
   cartQuantityEl.textContent = cartQuantity;
+}
+
+function addedToCart(id, timeoutID) {
+  clearTimeout(timeoutID);
+  const addedToCartEl = document.querySelector(`.js-added-to-cart-${id}`); 
+  addedToCartEl.classList.add('visible');
+  return timeoutID = setTimeout(() => {
+    addedToCartEl.classList.remove('visible')
+  }, 2000);
 }
 
 updateCart();
