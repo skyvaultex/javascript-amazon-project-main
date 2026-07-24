@@ -71,8 +71,6 @@ function selectorOutput(productId) {
   }
 };
 
-
-
 document.querySelector('.js-products-grid')
 .innerHTML = productsHTML;
 
@@ -106,7 +104,7 @@ function addedToCart(id, timeoutID) {
   clearTimeout(timeoutID);
   const addedToCartEl = document.querySelector(`.js-added-to-cart-${id}`); 
   addedToCartEl.classList.add('visible');
-  return timeoutID = setTimeout(() => {
+  return setTimeout(() => {
     addedToCartEl.classList.remove('visible')
   }, 2000);
 }
