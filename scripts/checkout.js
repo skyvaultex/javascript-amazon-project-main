@@ -1,107 +1,124 @@
-import {cart} from '../data/cart.js';
+import {cart, removeFromCart} from '../data/cart.js';
 import {products} from '../data/products.js';
 
 const orderSummaryEl = document.querySelector('.js-order-summary');
-let cartSummaryHTML = '';
 
+function renderCheckout() {
 
-const paymentSummary = {
-  itemQuantity: 0,
-  taxesPercentage: 10,
-  subtotalPriceCents: 0,
-};
+  let cartSummaryHTML = '';
 
-cart.forEach(cartItem => {
-  const { productId } = cartItem;
-  const matchingProduct = products.find(
-    product => product.id === productId
-  );
+  const paymentSummary = {
+    itemQuantity: 0,
+    taxesPercentage: 10,
+    subtotalPriceCents: 0,
+  };
 
-  if(!matchingProduct) return;
+  cart.forEach(cartItem => {
+    const { productId, quantity } = cartItem;
+    const matchingProduct = products.find(
+      product => product.id === productId
+    );
 
-  const {name, image, priceCents} = matchingProduct;
-  const {quantity} = cartItem;
+    if(!matchingProduct) return;
 
-  paymentSummary.subtotalPriceCents += priceCents * quantity;
-  paymentSummary.itemQuantity += quantity;
+    const {name, image, priceCents} = matchingProduct;
 
-  cartSummaryHTML += `
-    <div class="cart-item-container">
-    <div class="delivery-date">
-      Delivery date: Tuesday, June 21
+    paymentSummary.subtotalPriceCents += priceCents * quantity;
+    paymentSummary.itemQuantity += quantity;
+
+    cartSummaryHTML += `
+      <div class="cart-item-container js-cart-item-container-${productId}">
+      <div class="delivery-date">
+        Delivery date: Tuesday, June 21
+      </div>
+
+      <div class="cart-item-details-grid">
+        <img class="product-image"
+          src="${image}">
+
+        <div class="cart-item-details">
+          <div class="product-name">
+            ${name}
+          </div>
+          <div class="product-price">
+            $${(priceCents / 100).toFixed(2)}
+          </div>
+          <div class="product-quantity">
+            <span>
+              Quantity: <span class="quantity-label">${quantity}</span>
+            </span>
+            <span class="update-quantity-link js-update-quantity-link link-primary">
+              Update
+            </span>
+            <span class="delete-quantity-link js-delete-quantity-link link-primary" 
+            data-product-id="${productId}">
+              Delete
+            </span>
+          </div>
+        </div>
+        </div>
+        </div>`;
+  });
+  
+
+  const {itemQuantity, taxesPercentage, subtotalPriceCents} = paymentSummary;
+
+  const shippingCents = itemQuantity > 0 ? 499 : 0;
+  const totalPriceBeforeTax = subtotalPriceCents + shippingCents;
+  const taxCents = Math.round(totalPriceBeforeTax * taxesPercentage / 100);
+  const totalPriceAfterTax = totalPriceBeforeTax + taxCents;
+  const paymentSummaryEl = document.querySelector('.js-payment-summary');
+
+  paymentSummaryEl.innerHTML = 
+    `<div class="payment-summary-title">
+      Order Summary
     </div>
 
-    <div class="cart-item-details-grid">
-      <img class="product-image"
-        src="${image}">
+    <div class="payment-summary-row">
+      <div>Items (${itemQuantity}):</div>
+      <div class="payment-summary-money">$${(subtotalPriceCents / 100).toFixed(2)}</div>
+    </div>
 
-      <div class="cart-item-details">
-        <div class="product-name">
-          ${name}
-        </div>
-        <div class="product-price">
-          $${(priceCents / 100).toFixed(2)}
-        </div>
-        <div class="product-quantity">
-          <span>
-            Quantity: <span class="quantity-label">${quantity}</span>
-          </span>
-          <span class="update-quantity-link link-primary">
-            Update
-          </span>
-          <span class="delete-quantity-link link-primary">
-            Delete
-          </span>
-        </div>
-      </div>
-      </div>
-      </div>`
-});
+    <div class="payment-summary-row">
+      <div>Shipping &amp; handling:</div>
+      <div class="payment-summary-money">$${(shippingCents / 100).toFixed(2)}</div>
+    </div>
 
-orderSummaryEl.innerHTML = cartSummaryHTML;
+    <div class="payment-summary-row subtotal-row">
+      <div>Total before tax:</div>
+      <div class="payment-summary-money">$${(totalPriceBeforeTax / 100).toFixed(2)}</div>
+    </div>
 
-const {itemQuantity, taxesPercentage, subtotalPriceCents} = paymentSummary;
+    <div class="payment-summary-row">
+      <div>Estimated tax (${taxesPercentage}%):</div>
+      <div class="payment-summary-money">$${(taxCents / 100).toFixed(2)}</div>
+    </div>
 
-const shippingCents = itemQuantity > 0 ? 499 : 0;
-const totalPriceBeforeTax = subtotalPriceCents + shippingCents;
-const taxCents = Math.round(totalPriceBeforeTax * taxesPercentage / 100);
-const totalPriceAfterTax = totalPriceBeforeTax + taxCents;
-const paymentSummaryEl = document.querySelector('.js-payment-summary');
+    <div class="payment-summary-row total-row">
+      <div>Order total:</div>
+      <div class="payment-summary-money">$${(totalPriceAfterTax / 100).toFixed(2)}</div>
+    </div>
 
-paymentSummaryEl.innerHTML = 
-`<div class="payment-summary-title">
-            Order Summary
-          </div>
+    <button class="place-order-button button-primary">
+      Place your order
+    </button>`;
 
-          <div class="payment-summary-row">
-            <div>Items (${itemQuantity}):</div>
-            <div class="payment-summary-money">$${(subtotalPriceCents / 100).toFixed(2)}</div>
-          </div>
 
-          <div class="payment-summary-row">
-            <div>Shipping &amp; handling:</div>
-            <div class="payment-summary-money">$${(shippingCents / 100).toFixed(2)}</div>
-          </div>
+  orderSummaryEl.innerHTML = cartSummaryHTML;
 
-          <div class="payment-summary-row subtotal-row">
-            <div>Total before tax:</div>
-            <div class="payment-summary-money">$${(totalPriceBeforeTax / 100).toFixed(2)}</div>
-          </div>
+  document.querySelector('.js-checkout-header-middle-section').innerHTML = `
+    Checkout (<a class="return-to-home-link"
+    href="amazon.html">${itemQuantity} items</a>)`;
 
-          <div class="payment-summary-row">
-            <div>Estimated tax (${taxesPercentage}%):</div>
-            <div class="payment-summary-money">$${(taxCents / 100).toFixed(2)}</div>
-          </div>
+  const deleteButtonEl = document.querySelectorAll(`.js-delete-quantity-link`);
+  deleteButtonEl.forEach(deleteButton => {
+    deleteButton.addEventListener('click', () => {
+      const { productId } = deleteButton.dataset;
 
-          <div class="payment-summary-row total-row">
-            <div>Order total:</div>
-            <div class="payment-summary-money">$${(totalPriceAfterTax / 100).toFixed(2)}</div>
-          </div>
+      removeFromCart(productId);
+      renderCheckout();
+    });
+  });
+}
 
-          <button class="place-order-button button-primary">
-            Place your order
-          </button>`;
-
-document.querySelector('.js-checkout-header-middle-section').innerHTML = `
-  Checkout (<a class="return-to-home-link"
-  href="amazon.html">${itemQuantity} items</a>)`;
+renderCheckout();

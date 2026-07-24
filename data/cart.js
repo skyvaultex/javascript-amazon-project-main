@@ -1,5 +1,5 @@
 const savedCart = JSON.parse(localStorage.getItem('cart'));
-export const cart = savedCart ? savedCart : [];
+export let cart = savedCart ? savedCart : [];
 
 export function addToCart(productId, selectorQuantity) {
   let matchingItem;
@@ -16,5 +16,10 @@ export function addToCart(productId, selectorQuantity) {
         quantity: selectorQuantity
       })
     }
+  localStorage.setItem('cart', JSON.stringify(cart));
+}
+
+export function removeFromCart(productId) {
+  cart = cart.filter(cartItem => cartItem.productId !== productId);
   localStorage.setItem('cart', JSON.stringify(cart));
 }
