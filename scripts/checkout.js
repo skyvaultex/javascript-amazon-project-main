@@ -1,11 +1,13 @@
-import {cart, removeFromCart} from '../data/cart.js';
+import {cart, removeFromCart, updateQuantity} from '../data/cart.js';
 import {products} from '../data/products.js';
 
 const orderSummaryEl = document.querySelector('.js-order-summary');
+let updatingProductId = null;
 
 function renderCheckout() {
 
   let cartSummaryHTML = '';
+  let quantityControlHTML = '';
 
   const paymentSummary = {
     itemQuantity: 0,
@@ -26,6 +28,30 @@ function renderCheckout() {
     paymentSummary.subtotalPriceCents += priceCents * quantity;
     paymentSummary.itemQuantity += quantity;
 
+    let isUpdating = updatingProductId === productId;
+
+    if(isUpdating) {
+      quantityControlHTML = `
+        <span>
+          Quantity: 
+          <input class="js-new-quantity-input-${productId} new-quantity-input" type="number" value="${quantity}" 
+          data-quantity-id="new-quantity-input">
+        </span>
+        <span class="update-quantity-link js-save-quantity-link link-primary"
+        data-product-id="${productId}">
+          Save
+        </span>`;
+    } else {
+      quantityControlHTML = `
+        <span>
+          Quantity: <span class="quantity-label">${quantity}</span>
+        </span>
+        <span class="update-quantity-link js-update-quantity-link link-primary"
+        data-product-id="${productId}">
+          Update
+        </span>`;
+    }
+
     cartSummaryHTML += `
       <div class="cart-item-container js-cart-item-container-${productId}">
       <div class="delivery-date">
@@ -43,13 +69,8 @@ function renderCheckout() {
           <div class="product-price">
             $${(priceCents / 100).toFixed(2)}
           </div>
-          <div class="product-quantity">
-            <span>
-              Quantity: <span class="quantity-label">${quantity}</span>
-            </span>
-            <span class="update-quantity-link js-update-quantity-link link-primary">
-              Update
-            </span>
+          <div class="product-quantity js-product-quantity-${productId}">
+            ${quantityControlHTML}
             <span class="delete-quantity-link js-delete-quantity-link link-primary" 
             data-product-id="${productId}">
               Delete
@@ -110,6 +131,7 @@ function renderCheckout() {
     Checkout (<a class="return-to-home-link"
     href="amazon.html">${itemQuantity} items</a>)`;
 
+  // buttons 
   const deleteButtonEl = document.querySelectorAll(`.js-delete-quantity-link`);
   deleteButtonEl.forEach(deleteButton => {
     deleteButton.addEventListener('click', () => {
@@ -119,6 +141,34 @@ function renderCheckout() {
       renderCheckout();
     });
   });
-}
+
+    const updateButtonEl = document.querySelectorAll(`.js-update-quantity-link`);
+  updateButtonEl.forEach(updateButton => {
+    updateButton.addEventListener('click', () => {
+      const { productId } = updateButton.dataset;
+
+      updatingProductId = updatingProductId === productId ? null : productId;
+      console.log(updatingProductId);
+      
+      renderCheckout();
+    }
+  );
+  });
+
+
+  const saveButtonEl = document.querySelectorAll('.js-save-quantity-link');
+  saveButtonEl.forEach(saveButton => {
+    saveButton.addEventListener('click', () => {
+      const { productId } = saveButton.dataset;
+      
+      const inputEl = document.querySelector(`.js-new-quantity-input-${productId}`);
+      const newQuantity = Number(inputEl.value);
+      updateQuantity(productId, newQuantity);
+      updatingProductId = null;
+      renderCheckout();
+    });
+  });
+};
+
 
 renderCheckout();

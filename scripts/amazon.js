@@ -109,4 +109,5 @@ function addedToCart(id, timeoutID) {
   }, 2000);
 }
 
+
 updateCart();
