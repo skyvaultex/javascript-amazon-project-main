@@ -14,7 +14,8 @@ export function addToCart(productId, selectorQuantity) {
     } else {
       cart.push({
         productId,
-        quantity: selectorQuantity
+        quantity: selectorQuantity,
+        deliveryOptionId: 'standard'
       })
     }
   updateCart();
@@ -30,5 +31,14 @@ export function updateQuantity(productId, updatedQuantity) {
     cartItem => productId === cartItem.productId);
   if(!matchingCartItem) return; // safety
   matchingCartItem.quantity = Number(updatedQuantity);
+  updateCart();
+}
+
+export function updateDeliveryOption(productId, deliveryOptionId) {
+  const matchingCartItem = cart.find(cartItem => cartItem.productId === productId);
+
+  if(!matchingCartItem) return;
+
+  matchingCartItem.deliveryOptionId = deliveryOptionId;
   updateCart();
 }

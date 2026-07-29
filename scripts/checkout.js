@@ -1,6 +1,25 @@
-import {cart, removeFromCart, updateQuantity} from '../data/cart.js';
+import {cart, removeFromCart, updateQuantity, updateDeliveryOption} from '../data/cart.js';
 import {products} from '../data/products.js';
-import {formatCurrency} from './utils/money.js';
+import {formatCurrency, formatShippingPrice} from './utils/money.js';
+import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
+
+const currentDate = dayjs();
+const deliveryOptions = {
+  standard: {
+    date: currentDate.add(7, 'days').format('dddd, MMMM D'),
+    priceCents: 0
+  },
+  express: {
+    date: currentDate.add(3, 'days').format('dddd, MMMM D'),
+    priceCents: 499
+  },
+  nextDay: {
+    date: currentDate.add(1, 'days').format('dddd, MMMM D'),
+    priceCents: 999
+  }
+};
+
+const { standard, express, nextDay } = deliveryOptions;
 
 const orderSummaryEl = document.querySelector('.js-order-summary');
 let updatingProductId = null;
@@ -13,23 +32,26 @@ function renderCheckout() {
     itemQuantity: 0,
     taxesPercentage: 10,
     subtotalPriceCents: 0,
+    shippingCents: 0
   };
 
   cart.forEach(cartItem => {
     let quantityControlHTML = '';
-    const { productId, quantity } = cartItem;
+    const { productId, quantity, deliveryOptionId} = cartItem;
     const matchingProduct = products.find(
       product => product.id === productId
     );
 
     if(!matchingProduct) return;
 
+    const selectedDeliveryOptionId = deliveryOptionId || 'standard';
+    const selectedDeliveryOption = deliveryOptions[selectedDeliveryOptionId];
+
     const {name, image, priceCents} = matchingProduct;
 
     paymentSummary.subtotalPriceCents += priceCents * quantity;
     paymentSummary.itemQuantity += quantity;
-
-
+    paymentSummary.shippingCents += selectedDeliveryOption.priceCents;
 
     const isUpdating = updatingProductId === productId;
 
@@ -57,7 +79,7 @@ function renderCheckout() {
     cartSummaryHTML += `
       <div class="cart-item-container js-cart-item-container-${productId}">
         <div class="delivery-date">
-          Delivery date: Tuesday, June 21
+          Delivery date: ${selectedDeliveryOption.date}
         </div>
 
         <div class="cart-item-details-grid">
@@ -69,7 +91,7 @@ function renderCheckout() {
               ${name}
             </div>
             <div class="product-price">
-              $${(priceCents / 100).toFixed(2)}
+              $${formatCurrency(priceCents)}
             </div>
             <div class="product-quantity js-product-quantity-${productId}">
               ${quantityControlHTML}
@@ -83,47 +105,47 @@ function renderCheckout() {
         <div class="delivery-options">
               <div class="delivery-options-title">
                 Choose a delivery option:
-              </div>s
+              </div>
 
               
         <div class="js-delivery-option delivery-option" data-delivery-option-id="${productId}" data-testid="delivery-option-${productId}">
 
-          <input class="js-delivery-option-input delivery-option-input" checked="" name="${matchingProduct.id}-delivery-option" type="radio" data-testid="delivery-option-input">
+          <input class="js-delivery-option-input delivery-option-input" name="${productId}-delivery-option" type="radio" value="standard" ${selectedDeliveryOptionId === "standard" ? "checked" : ""} data-product-id="${productId}">
 
           <div>
             <div class="delivery-option-date">
-              Tuesday, August 4
+              ${standard.date}
             </div>
             <div class="delivery-option-price">
-              FREE Shipping
+              ${formatShippingPrice(standard.priceCents)}
             </div>
           </div>
         </div>
       
         <div class="js-delivery-option delivery-option" data-delivery-option-id="${productId}" data-testid="delivery-option-${productId}">
 
-          <input class="js-delivery-option-input delivery-option-input" name="${matchingProduct.id}-delivery-option" type="radio" data-testid="delivery-option-input">
+          <input class="js-delivery-option-input delivery-option-input" name="${productId}-delivery-option" type="radio" value="express" ${selectedDeliveryOptionId === "express" ? "checked" : ""} data-product-id="${productId}">
 
           <div>
             <div class="delivery-option-date">
-              Wednesday, July 29
+              ${express.date}
             </div>
             <div class="delivery-option-price">
-              $4.99 - Shipping
+              ${formatShippingPrice(express.priceCents)}
             </div>
           </div>
         </div>
       
         <div class="js-delivery-option delivery-option" data-delivery-option-id="${productId}" data-testid="delivery-option-${productId}">
 
-          <input class="js-delivery-option-input delivery-option-input" name="${matchingProduct.id}-delivery-option" type="radio" data-testid="delivery-option-input">
+          <input class="js-delivery-option-input delivery-option-input" name="${productId}-delivery-option" type="radio" value="nextDay" ${selectedDeliveryOptionId === "nextDay" ? "checked" : ""} data-product-id="${productId}">
 
           <div>
             <div class="delivery-option-date">
-              Monday, July 27
+              ${nextDay.date}
             </div>
             <div class="delivery-option-price">
-              $9.99 - Shipping
+              ${formatShippingPrice(nextDay.priceCents)}
             </div>
           </div>
         </div>
@@ -142,11 +164,9 @@ function renderCheckout() {
       <a href="amazon.html" class="button-primary view-products-link"> View Products </a>
     </div>`;
   }
-  
 
-  const {itemQuantity, taxesPercentage, subtotalPriceCents} = paymentSummary;
+  const {itemQuantity, taxesPercentage, subtotalPriceCents, shippingCents} = paymentSummary;
 
-  const shippingCents = itemQuantity > 0 ? 499 : 0;
   const totalPriceBeforeTax = subtotalPriceCents + shippingCents;
   const taxCents = Math.round(totalPriceBeforeTax * taxesPercentage / 100);
   const totalPriceAfterTax = totalPriceBeforeTax + taxCents;
@@ -188,6 +208,19 @@ function renderCheckout() {
 
 
   orderSummaryEl.innerHTML = cartSummaryHTML;
+
+  const deliveryOptionEls = document.querySelectorAll('.js-delivery-option-input');
+  deliveryOptionEls.forEach(option => {
+    option.addEventListener("change", () => {
+      const { productId } = option.dataset;
+      const deliveryOptionId = option.value;
+      updateDeliveryOption(productId, deliveryOptionId);
+      renderCheckout();
+    });
+  });
+
+
+  
 
   document.querySelector('.js-checkout-header-middle-section').innerHTML = `
     Checkout (<a class="return-to-home-link"
