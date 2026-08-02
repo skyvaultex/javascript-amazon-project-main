@@ -2,6 +2,7 @@ import {cart, removeFromCart, updateQuantity, updateDeliveryOption} from '../dat
 import {products} from '../data/products.js';
 import {formatCurrency, formatShippingPrice} from './utils/money.js';
 import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
+import '../data/cart-oop.js';
 
 const currentDate = dayjs();
 const deliveryOptions = {
