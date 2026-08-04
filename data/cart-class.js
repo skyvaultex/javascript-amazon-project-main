@@ -1,13 +1,13 @@
 class Cart {
-  cartItems = JSON.parse(localStorage.getItem(this.localStorageKey)) || [];
-  localStorageKey;
+  #localStorageKey;
+  cartItems = JSON.parse(localStorage.getItem(this.#localStorageKey)) || [];
 
   constructor(localStorageKey) {
-    this.localStorageKey = localStorageKey;
+    this.#localStorageKey = localStorageKey;
   }
 
   updateCart() {
-    localStorage.setItem(this.localStorageKey, JSON.stringify(this.cartItems))
+    localStorage.setItem(this.#localStorageKey, JSON.stringify(this.cartItems))
   }
 
   addToCart(productId, selectorQuantity) {
