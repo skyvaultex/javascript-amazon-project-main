@@ -22,10 +22,14 @@ class Product {
   getPrice () {
     return `$${formatCurrency(this.priceCents)}`
   }
+
+  showSizeChartLink() {
+    return '';
+  }
 };
 
 
-export const products = [
+export const productList = [
   {
     id: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
     image: "images/products/athletic-cotton-socks-6-pairs.jpg",
@@ -684,6 +688,26 @@ export const products = [
       "mens"
     ]
   }
-].map((productDetails) => {
+];
+
+class Clothing extends Product {
+  sizeChartLink;
+  constructor(productDetails) {
+    super(productDetails);
+    this.sizeChartLink = productDetails.sizeChartLink;
+  }
+
+  
+  showSizeChartLink() {
+    return `<a href="${this.sizeChartLink}" target="_blank">
+    Size Chart
+    </a>`;
+  }
+}
+
+export const products = productList
+.map(productDetails => {
+  if(productDetails.type === 'clothing') return new Clothing(productDetails);
   return new Product(productDetails);
 });
+
