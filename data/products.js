@@ -697,7 +697,7 @@ class Clothing extends Product {
     this.sizeChartLink = productDetails.sizeChartLink;
   }
 
-  
+
   showSizeChartLink() {
     return `<a href="${this.sizeChartLink}" target="_blank">
     Size Chart
@@ -710,4 +710,3 @@ export const products = productList
   if(productDetails.type === 'clothing') return new Clothing(productDetails);
   return new Product(productDetails);
 });
-
