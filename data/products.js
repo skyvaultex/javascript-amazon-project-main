@@ -28,7 +28,7 @@ class Product {
   }
 };
 
-
+/*
 export const productList = [
   {
     id: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
@@ -689,6 +689,25 @@ export const productList = [
     ]
   }
 ];
+*/
+
+export let products = [];
+
+export function loadProducts(fun) {
+  const xhr = new XMLHttpRequest();
+
+  xhr.addEventListener('load', () => { 
+    products = JSON.parse(xhr.response).map(productDetails => {
+      if(productDetails.type === 'clothing') return new Clothing(productDetails);
+    return new Product(productDetails);
+    })
+    console.log('loaded');
+    fun();
+  })
+
+  xhr.open('GET', 'https://supersimplebackend.dev/products');
+  xhr.send();
+};
 
 class Clothing extends Product {
   sizeChartLink;
@@ -704,9 +723,3 @@ class Clothing extends Product {
     </a>`;
   }
 }
-
-export const products = productList
-.map(productDetails => {
-  if(productDetails.type === 'clothing') return new Clothing(productDetails);
-  return new Product(productDetails);
-});
