@@ -1,11 +1,52 @@
-import {cart, removeFromCart, updateQuantity, updateDeliveryOption} from '../data/cart.js';
+import {cart, removeFromCart, updateQuantity, updateDeliveryOption, loadCart} from '../data/cart.js';
 import {products, loadProducts} from '../data/products.js';
 import {formatCurrency, formatShippingPrice} from './utils/money.js';
 import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
 // import '../data/backend-practice.js';
 // import '../data/cart-oop.js';
 
-loadProducts(renderPage);
+Promise.all([
+  new Promise ((resolve) => {
+    loadProducts(() => {
+      resolve('value1');
+    });
+  }),
+  new Promise(resolve => {
+    loadCart(() => {
+      resolve();
+    })
+  })
+]).then(() => {
+  renderPage();
+});
+
+/*
+new Promise ((resolve) => {
+  loadProducts(() => {
+    resolve('value1');
+  });
+
+}).then((value) => {
+  console.log(value);
+  return new Promise(resolve => {
+    loadCart(() => {
+      resolve();
+    })
+  })
+
+}).then(() => {
+  return new Promise(resolve => {
+    renderPage();
+  })
+})
+
+  /*
+  loadProducts(() => {
+    loadCart(() => {
+      renderPage();
+    });
+  })*/ 
+
 function renderPage() {
   const currentDate = dayjs();
   const deliveryOptions = {

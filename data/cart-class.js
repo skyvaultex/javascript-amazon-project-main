@@ -52,6 +52,3 @@ class Cart {
 
 const cart = new Cart('cart-oop');
 const businessCart = new Cart('cart-business');
-
-console.log(cart,businessCart);
-console.log((cart instanceof Cart), (businessCart instanceof Cart));

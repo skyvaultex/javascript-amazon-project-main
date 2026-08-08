@@ -701,7 +701,6 @@ export function loadProducts(fun) {
       if(productDetails.type === 'clothing') return new Clothing(productDetails);
     return new Product(productDetails);
     })
-    console.log('loaded');
     fun();
   })
 
@@ -723,3 +722,4 @@ class Clothing extends Product {
     </a>`;
   }
 }
+
