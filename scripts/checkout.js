@@ -2,6 +2,7 @@ import {cart, removeFromCart, updateQuantity, updateDeliveryOption, loadCart} fr
 import {products, loadProducts, loadProductsFetch} from '../data/products.js';
 import {formatCurrency, formatShippingPrice} from './utils/money.js';
 import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
+import {addOrder} from '../../data/orders.js';
 // import '../data/backend-practice.js';
 // import '../data/cart-oop.js';
 
@@ -292,6 +293,26 @@ function renderPage() {
 
       // button disabled if quantity === 0;
     const placeOrderButtonEl = document.querySelector('.js-place-order-button');
+    placeOrderButtonEl.addEventListener('click', async () => {
+      try {
+        const response = await fetch('https://supersimplebackend.dev/orders', {
+        method: 'POST', 
+        headers: {
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          cart: cart
+        })
+      });
+      const order = await response.json();
+      addOrder(order);
+
+      } catch (error) {
+          console.log('Unexpected error. Try again later.');
+      }
+      
+      window.location.href = 'orders.html';
+    });
 
     if(itemQuantity === 0) {
       placeOrderButtonEl.classList.add('payment-buttons-disable');
