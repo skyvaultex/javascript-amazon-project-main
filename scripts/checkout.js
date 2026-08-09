@@ -7,13 +7,19 @@ import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
 
 
 async function loadPage() {
-  await loadProductsFetch();
+  try {
+    // throw('error1');
 
-  await new Promise(resolve => {
-    loadCart(() => {
-      resolve();
+    await loadProductsFetch();
+    await new Promise(resolve => {
+      loadCart(() => {
+        resolve();
+      })
     })
-  })
+
+  } catch (error) {
+    console.log(`Unexpected error: ${error.message}`);
+  }
 
   renderPage();
 }
