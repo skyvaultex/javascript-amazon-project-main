@@ -5,6 +5,22 @@ import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
 // import '../data/backend-practice.js';
 // import '../data/cart-oop.js';
 
+
+async function loadPage() {
+  await loadProductsFetch();
+
+  await new Promise(resolve => {
+    loadCart(() => {
+      resolve();
+    })
+  })
+
+  renderPage();
+}
+
+loadPage();
+
+/*
 Promise.all([
   loadProductsFetch(),
   new Promise(resolve => {
